@@ -1,0 +1,13 @@
+credentials:
+  usernames:
+    bojang:
+      email: timothy.i@roserocket.com
+      name: Tim
+      password: "$2b$12$OQ.tVDEl4giIXsYpb.k9NuG.Vyr.L6v/dBBy6OT3MxuKRjF6RyWmK"
+cookie:
+  expiry_days: 30
+  key: hackathon-mission-control
+  name: hackathon-mission-control
+preauthorized:
+  emails:
+    - timothy.i@roserocket.com

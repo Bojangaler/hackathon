@@ -1,35 +1,32 @@
-from openai import OpenAI
+from streamlit_authenticator import Authenticate
+import yaml
+from yaml.loader import SafeLoader
+from src.main_content import render_main_content
+
+with open("./config.yaml") as file:
+    config = yaml.load(file, Loader=SafeLoader)
+
 import streamlit as st
 
-GPT_MODEL = "gpt-4"
 
-with st.sidebar:
-    openai_api_key = st.text_input(
-        "OpenAI API Key", key="chatbot_api_key", type="password"
-    )
+GPT_MODEL = "gpt-3.5-turbo-1106"
+
+authenticator = Authenticate(
+    config["credentials"],
+    config["cookie"]["name"],
+    config["cookie"]["key"],
+    config["cookie"]["expiry_days"],
+    config["preauthorized"],
+)
+
+st.title("Rose Rocket Assistant 🌹")
+
+name, authentication_status, username = authenticator.login("Login", "main")
 
 
-st.title("💬 Chatbot")
-st.caption("🚀 A streamlit chatbot powered by OpenAI LLM")
-if "messages" not in st.session_state:
-    st.session_state["messages"] = [
-        {"role": "assistant", "content": "How can I help you?"}
-    ]
-
-for msg in st.session_state.messages:
-    st.chat_message(msg["role"]).write(msg["content"])
-
-if prompt := st.chat_input():
-    if not openai_api_key:
-        st.info("Please add your OpenAI API key to continue.")
-        st.stop()
-
-    client = OpenAI(api_key=openai_api_key)
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(prompt)
-    response = client.chat.completions.create(
-        model=GPT_MODEL, messages=st.session_state.messages
-    )
-    msg = response.choices[0].message.content
-    st.session_state.messages.append({"role": "assistant", "content": msg})
-    st.chat_message("assistant").write(msg)
+if authentication_status:
+    render_main_content(authenticator, name)
+elif authentication_status is False:
+    st.error("Username/password is incorrect")
+elif authentication_status is None:
+    st.warning("Please enter your username and password")
